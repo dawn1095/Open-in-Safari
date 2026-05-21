@@ -25,6 +25,23 @@ chrome.action.onClicked.addListener((tab) => {
   }
 });
 
+function getSupportedUrl(candidate) {
+  if (typeof candidate !== "string" || candidate.trim() === "") {
+    return null;
+  }
+
+  try {
+    const parsed = new URL(candidate);
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.toString();
+    }
+  } catch (error) {
+    console.warn("无效 URL，已忽略:", candidate, error);
+  }
+
+  return null;
+}
+
 function showErrorState(message) {
   chrome.action.setBadgeText({ text: 'ERR' });
   chrome.action.setBadgeBackgroundColor({ color: '#FF0000' });
@@ -41,7 +58,9 @@ function showSuccessState() {
 }
 
 function sendToSafari(url) {
-  if (!url || !url.startsWith('http')) {
+  const supportedUrl = getSupportedUrl(url);
+
+  if (!supportedUrl) {
     chrome.action.setBadgeText({ text: 'NO' });
     chrome.action.setBadgeBackgroundColor({ color: '#888888' });
     chrome.action.setTitle({ title: "仅支持 http/https 链接" });
@@ -52,7 +71,7 @@ function sendToSafari(url) {
   chrome.action.setTitle({ title: "正在通过 Native Messaging 调用 Safari..." });
   chrome.runtime.sendNativeMessage(
     'com.tabbit.open_in_safari',
-    { url: url },
+    { url: supportedUrl },
     (response) => {
       if (chrome.runtime.lastError) {
         const errMsg = chrome.runtime.lastError.message;
@@ -63,7 +82,7 @@ function sendToSafari(url) {
 
       if (!response || response.status !== "success") {
         console.error("Safari 响应异常:", response);
-        showErrorState("本地脚本返回异常响应");
+        showErrorState(response?.error || "本地脚本返回异常响应");
         return;
       }
 

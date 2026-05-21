@@ -1,9 +1,9 @@
 {
     "name": "com.tabbit.open_in_safari",
     "description": "Open in Safari Native Host",
-    "path": "/Users/xiaoqiang.chang/scripts/open_safari_host.py",
+    "path": "__HOST_PATH__",
     "type": "stdio",
     "allowed_origins": [
-        "chrome-extension://ifdekcbfbhofahjeckjcncdalnkjnaie/"
+        "__EXTENSION_ORIGIN__"
     ]
 }
