@@ -43,5 +43,20 @@
 
 ### **开发自检**
 
-- 运行测试：`python3 -m pytest tests/test_open_safari_host.py`
-- 校验安装脚本语法：`bash -n host/install.command`
+工具链由 `pyproject.toml` + `uv.lock` 统一接管（ruff 负责 lint + 格式化，替代 black/flake8/isort）：
+
+```bash
+uv sync                  # 首次：按 uv.lock 装齐 dev 依赖（pytest / ruff / mypy）
+uv run pytest            # 运行测试
+uv run ruff check .      # 静态检查（门禁，当前必须零告警）
+uv run ruff format .     # 格式化（暂不作为门禁，批量重排影响面大，需单独评估）
+uv run mypy              # 类型检查（门禁，当前必须零错误）
+bash -n host/install.command   # 校验安装脚本语法
+```
+
+> **运行时解释器约束**：`host/open_safari_host.py` 由浏览器按 shebang `#!/usr/bin/python3` 直接拉起，
+> 只能使用系统自带 `python3`（macOS 当前为 3.9），因此 `requires-python`、ruff `target-version` 均取 `py39`。
+> 禁止把 shebang 改成 uv 托管解释器的绝对路径——那会写死本机路径，脚本分发到其他机器后立即失效。
+>
+> **版本号**：唯一真身在 `extensions/manifest.json` 的 `version`；`pyproject.toml` 的 `[project].version`
+> 为派生镜像，由 `tests/test_version_consistency.py` 强校验。

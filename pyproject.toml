@@ -1,0 +1,63 @@
+# 项目工程化配置：工具链统一由此文件与 uv.lock 接管
+#
+# 运行时说明：host/open_safari_host.py 由浏览器 Native Messaging 直接拉起，
+# 走 shebang `#!/usr/bin/python3`，因此只能使用系统自带的 python3（当前 macOS 为 3.9）。
+# 这也是 requires-python / ruff / mypy 一致取 3.9 的原因——类型检查必须对齐真实运行下限，
+# 而非开发机上恰好装着的解释器版本。禁止在此处改成 uv 托管解释器的绝对路径：
+# 那会写死本机路径，导致脚本分发到其他机器后 shebang 失效。
+#
+# 版本号：唯一真身在 extensions/manifest.json 的 version 字段；此处 version 为派生镜像，
+# 由 tests/test_version_consistency.py 强校验二者一致。
+[project]
+name = "open-in-safari"
+version = "1.0"
+description = "Open in Safari 浏览器扩展 + Native Messaging 宿主"
+requires-python = ">=3.9"
+dependencies = []
+
+[dependency-groups]
+dev = [
+    # 测试框架
+    "pytest>=8.0.0",
+    # 代码格式化 + 静态检查（替代 black/flake8/isort）
+    "ruff>=0.14.0",
+    # 类型检查
+    "mypy>=1.18.0",
+]
+
+[tool.uv]
+# 非可安装包（浏览器直接按脚本路径拉起）；version 为静态镜像，无需构建后端参与
+package = false
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle 错误
+    "W",  # pycodestyle 警告
+    "F",  # Pyflakes
+    "I",  # isort（导入排序）
+    "B",  # flake8-bugbear
+    "C4", # flake8-comprehensions
+    "UP", # pyupgrade
+]
+ignore = [
+    "E501",  # 行长度限制（由格式化工具处理）
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+# mypy ≥1.18 不再接受 3.9 目标版本（要求 ≥3.10），故此处取可校验的最低版本；
+# 真正的 3.9 运行下限由 ruff target-version = "py39" 与 README 约束兜底。
+python_version = "3.10"
+files = ["host", "tests"]
+ignore_missing_imports = true
