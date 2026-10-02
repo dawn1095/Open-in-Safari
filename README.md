@@ -48,10 +48,10 @@
 ```bash
 uv sync                  # 首次：按 uv.lock 装齐 dev 依赖（pytest / ruff / mypy）
 uv run pytest            # 运行测试
-uv run ruff check .      # 静态检查（门禁，当前必须零告警）
-uv run ruff format .     # 格式化（暂不作为门禁，批量重排影响面大，需单独评估）
-uv run mypy              # 类型检查（门禁，当前必须零错误）
-bash -n host/install.command   # 校验安装脚本语法
+uv run ruff check .           # 静态检查（门禁，当前必须零告警）
+uv run ruff format --check .  # 格式检查（门禁，当前零差异）
+uv run mypy                   # 类型检查（门禁，当前必须零错误）
+bash -n host/install.command  # 校验安装脚本语法
 ```
 
 > **运行时解释器约束**：`host/open_safari_host.py` 由浏览器按 shebang `#!/usr/bin/python3` 直接拉起，
