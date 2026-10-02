@@ -5,7 +5,6 @@ from pathlib import Path
 
 import pytest
 
-
 MODULE_PATH = Path(__file__).resolve().parents[1] / "host" / "open_safari_host.py"
 SPEC = importlib.util.spec_from_file_location("open_safari_host", MODULE_PATH)
 assert SPEC and SPEC.loader

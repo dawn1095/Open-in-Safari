@@ -67,7 +67,8 @@ def open_in_safari(url: str) -> dict[str, str]:
 
 def handle_message(message: dict[str, Any]) -> dict[str, str]:
     url = message.get("url")
-    if not is_allowed_url(url):
+    # isinstance 收窄供类型检查器识别；is_allowed_url 内部同样做此校验，运行时行为不变
+    if not isinstance(url, str) or not is_allowed_url(url):
         return {"status": "error", "error": "Invalid or unsafe URL protocol"}
     return open_in_safari(url)
 
